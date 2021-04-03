@@ -2,9 +2,9 @@
 
 class InstagramConstants:
     BASE_URL = 'https://www.instagram.com/'
-    LOGIN_URL = 'accounts/login/ajax/'
-    USER_URL = '/?__a=1'
-    QUERY_URL = "graphql/query/"
+    LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/'
+    USER_URL = 'https://www.instagram.com/__USER__/?__a=1'
+    QUERY_URL = "https://www.instagram.com/graphql/query/"
 
     QUERY_MEDIAS = '42d2750e44dbac713ff30130659cd891'
     QUERY_MEDIA = 'cf28bf5eb45d62d4dc8e77cdb99d750d'
