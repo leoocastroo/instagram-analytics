@@ -35,7 +35,7 @@ class InstagramExtract():
                 'optIntoOneTap': 'false'
             }
 
-            response = self.session.post(InstagramConstants.BASE_URL+InstagramConstants.LOGIN_URL, data = payload)
+            response = self.session.post(InstagramConstants.LOGIN_URL, data = payload)
             data = json.loads(response.text)
 
             if data.get("authenticated"):
@@ -44,7 +44,7 @@ class InstagramExtract():
                 raise Exception(f'Error! login failed {response.text}')
 
     def get_user(self):
-        response = self.session.get(InstagramConstants.BASE_URL+self.username+InstagramConstants.USER_URL)
+        response = self.session.get(InstagramConstants.USER_URL.replace('__USER__', self.username))
 
         if response.status_code == 200:
             self.user = response.json()['graphql']['user']
@@ -55,7 +55,7 @@ class InstagramExtract():
         self.followers = []
 
         while has_next_page:
-            igq = InstagramConstants.BASE_URL+InstagramConstants.QUERY_URL
+            igq = InstagramConstants.QUERY_URL
             payload = {
                 "query_hash": InstagramConstants.QUERY_FOLLOWERS,
                 "id": self.user['id'],
@@ -83,7 +83,7 @@ class InstagramExtract():
         has_next_page = True
         self.medias = []
         while has_next_page:
-            igq = InstagramConstants.BASE_URL+InstagramConstants.QUERY_URL
+            igq = InstagramConstants.QUERY_URL
             payload = {
                 "query_hash": InstagramConstants.QUERY_MEDIAS,
                 "id": self.user['id'],
@@ -108,7 +108,7 @@ class InstagramExtract():
         if len(self.medias) > (media_index-1):
             media = self.medias[media_index-1]
 
-            igq = InstagramConstants.BASE_URL+InstagramConstants.QUERY_URL
+            igq = InstagramConstants.QUERY_URL
             payload = {
                 "query_hash":"cf28bf5eb45d62d4dc8e77cdb99d750d",
                 "shortcode": media["node"]["shortcode"],
@@ -136,7 +136,7 @@ class InstagramExtract():
         short_code = media['data']["shortcode_media"]["shortcode"]
 
         while has_next_page:
-            igq = InstagramConstants.BASE_URL + InstagramConstants.QUERY_URL
+            igq = InstagramConstants.QUERY_URL
             payload = {
                 "query_hash": InstagramConstants.QUERY_COMMENTS,
                 "shortcode": short_code,
