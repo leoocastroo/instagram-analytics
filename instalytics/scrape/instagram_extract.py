@@ -17,6 +17,16 @@ class InstagramExtract():
 
         self.cookies = cookies
 
+        self.medias = []
+
+        self.media = None
+
+        self.user = None
+
+        self.followers = []
+
+        self.followed = []
+
         self.session = requests.session()
 
     def login(self):
@@ -150,8 +160,7 @@ class InstagramExtract():
             media = response.json()
             if get_comments:
                 media['data']["shortcode_media"]["edge_media_to_parent_comment"]["edges"] = self.get_media_comments(media)
-            return media["data"]
-        return {}
+            self.media = media["data"]
 
     def get_media_comments(self, media):
         end_cursor = media['data']["shortcode_media"]["edge_media_to_parent_comment"]["page_info"]["end_cursor"]
@@ -185,7 +194,7 @@ class InstagramExtract():
 
 
 if __name__ == '__main__':
-    ie = InstagramExtract('raffalobianco', 'leocastroo', 'Lpc)(200600LPC')
+    ie = InstagramExtract()
     ie.login()
     ie.get_user()
     # ie.get_medias(stop_date=datetime(2021,1,1))
