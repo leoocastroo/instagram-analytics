@@ -76,7 +76,36 @@ class InstagramExtract():
                     has_next_page = False
                 self.followers.extend(result['data']['user']['edge_followed_by']['edges'])
             else:
-                break
+                has_next_page = False
+
+    def get_followed(self):
+        end_cursor = ''
+        has_next_page = True
+        self.followed = []
+
+        while has_next_page:
+            igq = InstagramConstants.QUERY_URL
+            payload = {
+                "query_hash": InstagramConstants.QUERY_FOLLOWED,
+                "id": self.user['id'],
+                "include_reel": True,
+                "fetch_mutual": False,
+                "first": 12,
+                "after": end_cursor
+            }
+
+            response = self.session.get(igq, params=payload)
+            if response.status_code == 200:
+                result = response.json()
+
+                has_next_page = result['data']['user']['edge_follow']['page_info']['has_next_page']
+                if has_next_page:
+                    end_cursor = result['data']['user']['edge_follow']['page_info']['end_cursor']
+                else:
+                    has_next_page = False
+                self.followed.extend(result['data']['user']['edge_follow']['edges'])
+            else:
+                has_next_page = False
 
     def get_medias(self):
         end_cursor = ''
@@ -102,32 +131,27 @@ class InstagramExtract():
                     has_next_page = False
                 self.medias.extend(result['data']['user']['edge_owner_to_timeline_media']['edges'])
             else:
-                break
+                has_next_page = False
 
-    def get_media(self, media_index, get_comments=False):
-        if len(self.medias) > (media_index-1):
-            media = self.medias[media_index-1]
+    def get_media(self, shortcode, get_comments=False):
+        igq = InstagramConstants.QUERY_URL
+        payload = {
+            "query_hash":"cf28bf5eb45d62d4dc8e77cdb99d750d",
+            "shortcode": shortcode,
+            "child_comment_count":3,
+            "fetch_comment_count":40,
+            "parent_comment_count":24,
+            "has_threaded_comments": True
+        }
 
-            igq = InstagramConstants.QUERY_URL
-            payload = {
-                "query_hash":"cf28bf5eb45d62d4dc8e77cdb99d750d",
-                "shortcode": media["node"]["shortcode"],
-                "child_comment_count":3,
-                "fetch_comment_count":40,
-                "parent_comment_count":24,
-                "has_threaded_comments": True
-            }
+        response = self.session.get(igq, params=payload)
 
-            response = self.session.get(igq, params=payload)
-
-            if response.status_code == 200:
-                media = response.json()
-                if get_comments:
-                    media['data']["shortcode_media"]["edge_media_to_parent_comment"]["edges"] = self.get_media_comments(media)
-                return media["data"]
-            return {}
-        else:
-            raise Exception('Error! media_index must be less or equal len(self.medias)')
+        if response.status_code == 200:
+            media = response.json()
+            if get_comments:
+                media['data']["shortcode_media"]["edge_media_to_parent_comment"]["edges"] = self.get_media_comments(media)
+            return media["data"]
+        return {}
 
     def get_media_comments(self, media):
         end_cursor = media['data']["shortcode_media"]["edge_media_to_parent_comment"]["page_info"]["end_cursor"]
@@ -155,14 +179,15 @@ class InstagramExtract():
                     has_next_page = False
                 comments.extend(result['data']['shortcode_media']['edge_media_to_parent_comment']['edges'])
             else:
-                break
+                has_next_page = False
 
         return comments
 
 
 if __name__ == '__main__':
-    ie = InstagramExtract()
+    ie = InstagramExtract('raffalobianco', 'leocastroo', 'Lpc)(200600LPC')
     ie.login()
     ie.get_user()
-    ie.get_medias()
-    ie.get_media(2, get_comments=True)
+    # ie.get_medias(stop_date=datetime(2021,1,1))
+    # ie.get_followers()
+    # ie.get_media(ie.medias[1]['node']['shortcode'], get_comments=True)
